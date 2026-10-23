@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TAMEEM CHAT - TEAM AI</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial;background:#111b21}
+.app{max-width:500px;margin:0 auto;background:#fff;min-height:100vh;display:flex;flex-direction:column}
+.top{background:#075E54;color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:99}
+.logo{display:flex;gap:8px;align-items:center;font-weight:bold}
+.t-logo{width:36px;height:36px;background:#25D366;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.tabs{display:flex;background:#075E54;position:sticky;top:50px;z-index:99}
+.tab{flex:1;padding:10px 1px;text-align:center;color:#ffffffa0;font-size:11px;font-weight:bold;cursor:pointer;border-bottom:3px solid transparent}
+.tab.active{color:#fff;border-bottom-color:#25D366}
+.page{display:none;flex:1;flex-direction:column;overflow:hidden}.page.active{display:flex}
+.login-page{position:fixed;inset:0;background:#075E54;display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.login-box{background:#fff;border-radius:16px;padding:22px;width:100%;max-width:380px}
+.login-box input{width:100%;padding:12px;border:1px solid #ccc;border-radius:10px;margin:6px 0}
+.btn{border:none;padding:11px 18px;border-radius:22px;font-weight:bold;cursor:pointer}
+.btn-green{background:#075E54;color:#fff}.btn-light{background:#e9edef}
+.post-box{padding:10px;background:#f0f2f5;border-bottom:1px solid #ddd}
+.post-box textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:10px}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.feed{flex:1;overflow:auto;background:#e5ddd5;padding:8px;display:flex;flex-direction:column;gap:10px}
+.card{background:#fff;border-radius:12px;padding:10px;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.card img,.card video{width:100%;border-radius:10px;margin-top:6px;max-height:400px;background:#000}
+.dl{display:inline-block;margin-top:6px;background:#25D366;color:#fff;padding:6px 14px;border-radius:18px;text-decoration:none;font-size:13px;font-weight:bold;margin-right:4px}
+.act{border:none;background:#f0f2f5;padding:6px 12px;border-radius:18px;margin-top:6px;cursor:pointer;margin-right:4px}
+.list{flex:1;overflow:auto;background:#fff}
+.item{padding:12px 14px;border-bottom:1px solid #eee;display:flex;gap:10px;align-items:center;cursor:pointer}
+.av{width:42px;height:42px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold}
+.chat-area{flex:1;overflow:auto;padding:10px;background:#e5ddd5;display:flex;flex-direction:column;gap:7px}
+.bub{max-width:82%;padding:8px 11px;border-radius:12px;font-size:14px;word-break:break-word}
+.me{background:#d9fdd3;align-self:flex-end}.other{background:#fff;align-self:flex-start}
+.chat-bar{padding:8px;display:flex;gap:6px;background:#f0f2f5;align-items:center}
+.chat-bar input{flex:1;padding:12px;border-radius:25px;border:1px solid #ccc}
+.badge{background:red;color:#fff;border-radius:12px;padding:2px 7px;font-size:11px}
+.ai{background:#e7f3ff;border-left:4px solid #075E54}
+</style>
+</head>
+<body>
+<div id="loginPage" class="login-page">
+<div class="login-box">
+<h2 style="text-align:center"><span style="background:#25D366;color:#fff;width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px">T</span> TAMEEM CHAT</h2>
+<p style="text-align:center;color:#666;font-size:12px;margin:8px 0">TEAM AI inside</p>
+<input id="loginName" placeholder="Your Name">
+<input id="loginPass" type="password" placeholder="Password">
+<input id="loginPass2" type="password" placeholder="Confirm Password (new account)" style="display:none">
+<button class="btn btn-green" style="width:100%;margin-top:10px" onclick="doLogin()">Login / Create Account</button>
+<p id="loginMsg" style="text-align:center;color:red;font-size:12px;margin-top:8px"></p>
+<small style="color:#888">Create account first, then login with same password</small>
+</div>
+</div>
+
+<div class="app">
+<div class="top"><div class="logo"><div class="t-logo">T</div>TAMEEM CHAT</div><div style="display:flex;gap:12px"><span onclick="showPage('notif')">🔔<span id="notifCount" class="badge">0</span></span><span onclick="showPage('settings')">⚙️</span></div></div>
+<div class="tabs">
+<div class="tab active" id="tab-home" onclick="showPage('home')">HOME</div>
+<div class="tab" id="tab-friends" onclick="showPage('friends')">FRIENDS</div>
+<div class="tab" id="tab-groups" onclick="showPage('groups')">GROUPS</div>
+<div class="tab" id="tab-chat" onclick="showPage('chat')">CHAT</div>
+<div class="tab" id="tab-team" onclick="showPage('team')">TEAM AI</div>
+</div>
+
+<div id="home" class="page active">
+<div class="post-box">
+<b id="welcome" style="color:#075E54">Hello</b>
+<textarea id="postText" rows="2" placeholder="Post movie, picture, voice, text..."></textarea>
+<div class="row">
+<input type="file" id="mediaFile" accept="image/*,video/*,audio/*" style="font-size:11px;width:140px">
+<button class="btn btn-light" id="voiceBtn" onclick="toggleVoice()">🎤 Voice</button>
+<span id="recStatus" style="display:none;font-size:12px">● Rec...</span>
+<button class="btn btn-green" style="width:auto" onclick="createPost()">Post</button>
+</div>
+<audio id="preview" controls style="display:none;width:100%;margin-top:6px"></audio>
+</div>
+<div id="feed" class="feed"></div>
+</div>
+
+<div id="friends" class="page">
+<div class="post-box"><b>Add Friend</b><div class="row"><input id="friendName" placeholder="Friend name" style="flex:1;padding:10px;border:1px solid #ccc;border-radius:8px"><button class="btn btn-green" style="width:auto" onclick="addFriend()">Add</button></div></div>
+<div id="friendsList" class="list"></div>
+</div>
+
+<div id="groups" class="page">
+<div class="post-box"><b>Create Group</b><div class="row"><input id="groupName" placeholder="Group name" style="flex:1;padding:10px;border:1px solid #ccc;border-radius:8px"><button class="btn btn-green" style="width:auto" onclick="createGroup()">Create</button></div></div>
+<div id="groupsList" class="list"></div>
+</div>
+
+<div id="chat" class="page">
+<div id="chatTitle" style="padding:10px;background:#f0f2f5;text-align:center;font-weight:bold;border-bottom:1px solid #ddd">General Chat</div>
+<div id="chatMsgs" class="chat-area"></div>
+<div class="chat-bar"><button onclick="toggleVoice()" style="border:none;background:#25D366;color:#fff;width:40px;height:40px;border-radius:50%">🎤</button><input id="txt" placeholder="Message..."><button id="send" class="btn btn-green" style="width:auto;border-radius:50%;width:44px;height:44px">➤</button></div>
+</div>
+
+<div id="team" class="page">
+<div style="background:#075E54;color:#fff;padding:8px 12px"><b>🤖 TEAM AI</b> <small>- Ask anything</small></div>
+<div id="aiChat" class="feed" style="background:#fff"><div class="card ai"><b>TEAM:</b> I am TEAM AI inside TAMEEM CHAT. Ask about movies, pictures, voice, posting!</div></div>
+<div class="chat-bar"><input id="aiInput" placeholder="Ask TEAM..."><button class="btn btn-green" style="width:auto;border-radius:50%;width:44px;height:44px" onclick="askTeam()">➤</button></div>
+</div>
+
+<div id="notif" class="page"><div style="padding:12px;background:#fff;font-weight:bold;border-bottom:1px solid #eee">🔔 Notifications</div><div id="notifList" class="list"></div></div>
+
+<div id="settings" class="page"><div style="padding:14px"><h3 style="color:#075E54">⚙️ Settings</h3><input id="setName" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;margin:6px 0"><input id="setPass" type="password" placeholder="New password" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;margin:6px 0"><button class="btn btn-green" style="width:100%" onclick="saveSettings()">Save</button><button class="btn btn-light" style="width:100%;margin-top:8px" onclick="logout()">Logout</button></div></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getDatabase, ref, push, onChildAdded, get, update } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+const db=getDatabase(initializeApp({databaseURL:"https://tameem-chat-2024-default-rtdb.firebaseio.com"}));
+let users=JSON.parse(localStorage.getItem('t_users')||'{}');
+let currentUser=localStorage.getItem('t_currentUser')||"";
+let currentPass=localStorage.getItem('t_currentPass')||"";
+let friends=JSON.parse(localStorage.getItem('t_friends')||'[]');
+let groups=JSON.parse(localStorage.getItem('t_groups')||'[{"id":"general","name":"General Group"}]');
+let chatId=localStorage.getItem('t_chatId')||"general";
+let chatName=localStorage.getItem('t_chatName')||"General Group";
+let notifCount=0;
+let voiceUrl=null, recorder=null, isRec=false;
+
+function checkLogin(){ if(currentUser&&currentPass){ document.getElementById('loginPage').style.display='none'; init(); } else document.getElementById('loginPage').style.display='flex'; }
+window.doLogin=()=>{
+let n=document.getElementById('loginName').value.trim();
+let p=document.getElementById('loginPass').value.trim();
+let p2=document.getElementById('loginPass2');
+let msg=document.getElementById('loginMsg');
+if(!n||!p){msg.innerText='Enter name & password';return;}
+if(!users[n]){
+if(p2.style.display==='none'){p2.style.display='block';msg.innerText='New account: confirm password';return;}
+if(p!==p2.value.trim()){msg.innerText='Passwords not same';return;}
+users[n]=p; localStorage.setItem('t_users',JSON.stringify(users));
+}
+if(users[n]!==p){msg.innerText='Wrong password';return;}
+currentUser=n; currentPass=p;
+localStorage.setItem('t_currentUser',n); localStorage.setItem('t_currentPass',p);
+document.getElementById('loginPage').style.display='none'; init();
+}
+function init(){ document.getElementById('welcome').innerText='Hello '+currentUser; document.getElementById('setName').value=currentUser; renderFriends(); renderGroups(); listenPosts(); listenChat(); addNotif('Welcome '+currentUser); }
+window.logout=()=>{ localStorage.removeItem('t_currentUser'); localStorage.removeItem('t_currentPass'); location.reload(); }
+window.saveSettings=()=>{ let n=document.getElementById('setName').value.trim(); let p=document.getElementById('setPass').value.trim(); if(n&&n!==currentUser){ if(users[n]){alert('Name taken');return;} users[n]=users[currentUser]; delete users[currentUser]; currentUser=n; localStorage.setItem('t_currentUser',n);} if(p){ users[currentUser]=p; localStorage.setItem('t_currentPass',p);} localStorage.setItem('t_users',JSON.stringify(users)); alert('Saved'); }
+window.showPage=(id)=>{ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.getElementById(id).classList.add('active'); document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); let tab=document.getElementById('tab-'+id); if(tab) tab.classList.add('active'); if(id==='friends') renderFriends(); if(id==='groups') renderGroups(); }
+function addNotif(t){ notifCount++; document.getElementById('notifCount').innerText=notifCount; let d=document.createElement('div'); d.className='item'; d.innerHTML=`<div class="av">🔔</div><div><div>${t}</div><small>${new Date().toLocaleTimeString()}</small></div>`; document.getElementById('notifList').prepend(d); }
+window.addFriend=()=>{ let n=document.getElementById('friendName').value.trim(); if(!n) return alert('Enter name'); friends.push(n); localStorage.setItem('t_friends',JSON.stringify(friends)); document.getElementById('friendName').value=''; renderFriends(); addNotif('Friend added: '+n); }
+window.createGroup=()=>{ let n=document.getElementById('groupName').value.trim(); if(!n) return alert('Enter group name'); let id='group_'+Date.now(); groups.push({id,name:n}); localStorage.setItem('t_groups',JSON.stringify(groups)); document.getElementById('groupName').value=''; renderGroups(); addNotif('Group created: '+n); }
+function renderFriends(){ let el=document.getElementById('friendsList'); if(friends.length===0) el.innerHTML='<p style="padding:12px;color:#888">No friends yet</p>'; else el.innerHTML=friends.map(f=>{ let id='friend_'+f.toLowerCase().replace(/\s+/g,'_'); return `<div class="item" onclick="openChat('${id}','${f}')"><div class="av">${f[0].toUpperCase()}</div><div><b>${f}</b><br><small>Tap to chat + voice</small></div></div>`; }).join(''); }
+function renderGroups(){ let el=document.getElementById('groupsList'); el.innerHTML=groups.map(g=>`<div class="item" onclick="openChat('${g.id}','${g.name}')"><div class="av">G</div><div><b>${g.name}</b><br><small>Tap to open</small></div></div>`).join(''); }
+window.openChat=(id,name)=>{ chatId=id; chatName=name; localStorage.setItem('t_chatId',id); localStorage.setItem('t_chatName',name); document.getElementById('chatTitle').innerText=name+' Chat'; document.getElementById('chatMsgs').innerHTML=''; showPage('chat'); listenChat(); }
+window.toggleVoice=async()=>{ if(!isRec){ try{ let s=await navigator.mediaDevices.getUserMedia({audio:true}); recorder=new MediaRecorder(s); let ch=[]; recorder.ondataavailable=e=>ch.push(e.data); recorder.onstop=async()=>{ let blob=new Blob(ch,{type:'audio/webm'}); voiceUrl=await toBase64(blob); let a=document.getElementById('preview'); a.src=URL.createObjectURL(blob); a.style.display='block'; }; recorder.start(); isRec=true; document.getElementById('recStatus').style.display='inline'; document.getElementById('voiceBtn').innerText='⏹ Stop'; }catch(e){ alert('Mic blocked. Use Choose File > audio'); } }else{ recorder.stop(); isRec=false; document.getElementById('recStatus').style.display='none'; document.getElementById('voiceBtn').innerText='🎤 Voice'; } }
+function toBase64(b){ return new Promise((res,rej)=>{ let r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(b); }); }
+function esc(t){ let d=document.createElement('div'); d.textContent=t||''; return d.innerHTML; }
+window.createPost=async()=>{ let text=document.getElementById('postText').value.trim(); let file=document.getElementById('mediaFile').files[0]; let media='',mtype=''; if(file){ if(file.size>12*1024*1024) return alert('File too big <12MB'); media=await toBase64(file); if(file.type.startsWith('video')) mtype='video'; else if(file.type.startsWith('audio')) mtype='voice'; else mtype='image'; } else if(voiceUrl){ media=voiceUrl; mtype='voice'; } if(!text&&!media) return alert('Write or add media'); try{ await push(ref(db,'posts_v6'),{name:currentUser,text,media,mtype,likes:0,time:Date.now(),timeStr:new Date().toLocaleString()}); document.getElementById('postText').value=''; document.getElementById('mediaFile').value=''; voiceUrl=null; document.getElementById('preview').style.display='none'; }catch(e){ alert('Fix Firebase Rules! Console > Realtime Database > Rules > { .read:true, .write:true } Publish. '+e.message); } }
+function listenPosts(){ let r=ref(db,'posts_v6'); onChildAdded(r,s=>{ let k=s.key; let d=s.val(); let div=document.createElement('div'); div.className='card'; let mh=''; if(d.media){ if(d.mtype==='video') mh=`<video controls src="${d.media}"></video><a class="dl" href="${d.media}" download="movie-${k}.mp4">⬇ Download Movie</a>`; else if(d.mtype==='image') mh=`<img src="${d.media}"><a class="dl" href="${d.media}" download="pic-${k}.jpg">⬇ Download Picture</a>`; else if(d.mtype==='voice') mh=`<audio controls src="${d.media}" style="width:100%"></audio><a class="dl" href="${d.media}" download="voice-${k}.webm">⬇ Download Voice</a>`; } div.innerHTML=`<b style="color:#075E54">${esc(d.name)}</b> <small>${esc(d.timeStr||'')}</small><div style="margin-top:6px;white-space:pre-wrap">${esc(d.text||'')}</div>${mh}<div><button class="act" onclick="likePost('${k}')">❤️ Like (<span id="like-${k}">${d.likes||0}</span>)</button><button class="act" onclick="toggleC('${k}')">💬 Comment</button></div><div id="comments-${k}" style="display:none"><div id="cbox-${k}"></div><div style="display:flex;gap:4px;margin-top:6px"><input id="cinput-${k}" placeholder="Comment..." style="flex:1;padding:8px;border-radius:18px;border:1px solid #ccc"><button class="act" onclick="addComment('${k}')">Send</button></div></div>`; document.getElementById('feed').prepend(div); if(d.name!==currentUser) addNotif(d.name+' posted'); listenComments(k); }); }
+window.likePost=async(k)=>{ let r=ref(db,'posts_v6/'+k); let snap=await get(r); let d=snap.val(); let nl=(d.likes||0)+1; await update(r,{likes:nl}); let el=document.getElementById('like-'+k); if(el) el.innerText=nl; addNotif('Liked post ❤️'); }
+window.toggleC=(k)=>{ let e=document.getElementById('comments-'+k); e.style.display=e.style.display==='none'?'block':'none'; }
+window.addComment=async(k)=>{ let i=document.getElementById('cinput-'+k); let t=i.value.trim(); if(!t) return; await push(ref(db,'posts_v6/'+k+'/comments'),{name:currentUser,text:t,time:new Date().toLocaleTimeString()}); i.value=''; addNotif('You commented on post'); }
+function listenComments(k){ let r=ref(db,'posts_v6/'+k+'/comments'); onChildAdded(r,s=>{ let d=s.val(); let box=document.getElementById('cbox-'+k); if(!box) return; let div=document.createElement('div'); div.style.cssText='font-size:13px;padding:4px 0;border-bottom:1px solid #eee'; div.innerHTML=`<b>${esc(d.name)}:</b> ${esc(d.text)} <small style="color:#888">${esc(d.time)}</small>`; box.appendChild(div); }); }
+function listenChat(){ let cr=ref(db,'chats_v6/'+chatId); document.getElementById('chatMsgs').innerHTML=''; onChildAdded(cr,s=>{ let d=s.val(); let div=document.createElement('div'); div.className='bub '+(d.name===currentUser?'me':'other'); let c=esc(d.text||''); if(d.mtype==='voice'&&d.media) c=`<audio controls src="${d.media}" style="width:160px"></audio>`; div.innerHTML=`<b style="font-size:11px;color:#075E54">${esc(d.name)}</b><br>${c}<div style="font-size:10px;color:#888;text-align:right">${esc(d.time||'')}</div>`; document.getElementById('chatMsgs').appendChild(div); document.getElementById('chatMsgs').scrollTop=999999; if(d.name!==currentUser) addNotif('Message from '+d.name); }); }
+document.getElementById('send').onclick=async()=>{ let t=document.getElementById('txt'); let txt=t.value.trim(); if(!txt&&!voiceUrl) return; let p={name:currentUser,time:new Date().toLocaleTimeString(),timestamp:Date.now()}; if(voiceUrl){ p.media=voiceUrl; p.mtype='voice'; p.text='🎤 Voice note'; } else { p.text=txt; p.mtype='text'; } try{ await push(ref(db,'chats_v6/'+chatId),p); t.value=''; voiceUrl=null; document.getElementById('preview').style.display='none'; }catch(e){ alert('Fix Firebase Rules! '+e.message); } };
+window.askTeam=()=>{ let q=document.getElementById('aiInput').value.trim(); if(!q) return; let chat=document.getElementById('aiChat'); let u=document.createElement('div'); u.className='card'; u.style.background='#d9fdd3'; u.innerHTML=`<b>${esc(currentUser)}:</b> ${esc(q)}`; chat.appendChild(u); document.getElementById('aiInput').value=''; setTimeout(()=>{ let ans='TEAM: You asked "'+q+'". '; let low=q.toLowerCase(); if(low.includes('movie')) ans+='To download movies: HOME tab > see video > click ⬇ Download Movie. To upload: Choose File > movie (<12MB) > Post.'; else if(low.includes('picture')) ans+='Pictures: HOME > Choose File > picture > Post. Everyone can download with button.'; else if(low.includes('voice')) ans+='Voice: Click 🎤 Voice > Speak > Stop > Post. Appears with player + download.'; else if(low.includes('login')) ans+='Login: First create account with name + password. Next time login with same.'; else ans+='I am TEAM AI inside TAMEEM CHAT. I help with posting ideas, movies, translation. Ask me!'; let a=document.createElement('div'); a.className='card ai'; a.innerHTML=`<b>🤖 TEAM AI:</b><br>${esc(ans)}`; chat.appendChild(a); chat.scrollTop=99999; },600); }
+document.getElementById('aiInput').addEventListener('keypress',e=>{ if(e.key==='Enter') askTeam(); });
+document.getElementById('txt').addEventListener('keypress',e=>{ if(e.key==='Enter') document.getElementById('send').click(); });
+checkLogin();
+</script>
+</body>
+</html>
